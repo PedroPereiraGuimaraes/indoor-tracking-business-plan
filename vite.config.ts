@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     css: {
-      postcss: "./postcss.config.js",
+      postcss: "./postcss.config.cjs",
     },
     define: {
       // Isso permite usar process.env.API_KEY no código React, mesmo rodando no Vite
