@@ -1,0 +1,10 @@
+{
+  "env": {
+    "ROLLUP_SKIP_NODE_NATIVE": "true"
+  },
+  "build": {
+    "env": {
+      "ROLLUP_SKIP_NODE_NATIVE": "true"
+    }
+  }
+}
