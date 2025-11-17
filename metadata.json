@@ -1,0 +1,5 @@
+{
+  "name": "Business Plan Generator",
+  "description": "AI-powered application to generate comprehensive business plans for startups based on user input.",
+  "requestFramePermissions": []
+}
