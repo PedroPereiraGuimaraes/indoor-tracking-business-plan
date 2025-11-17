@@ -55,7 +55,6 @@ const initialData: StartupData = {
   values: "",
   segment: "",
   targetAudience: "",
-  competitors: "",
   problem: "",
   solution: "",
   products: "",
@@ -71,7 +70,7 @@ const initialData: StartupData = {
 // Definição dos campos obrigatórios
 const requiredFieldsByStep: { [key: number]: (keyof StartupData)[] } = {
   0: ["name", "mission", "vision", "values"],
-  1: ["segment", "targetAudience", "competitors"],
+  1: ["segment", "targetAudience"],
   2: ["problem", "solution", "products"],
   3: ["technology"],
   4: ["structure", "marketingStrategy"],
@@ -267,7 +266,6 @@ const CreatePlan: React.FC = () => {
 
   // Loading Logic
   const [progress, setProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(20);
   const progressInterval = useRef<any>(null);
 
   const handleChange = (
@@ -322,16 +320,11 @@ const CreatePlan: React.FC = () => {
 
   const startSimulation = () => {
     setProgress(0);
-    setTimeLeft(20);
     progressInterval.current = setInterval(() => {
       setProgress((prev) => {
         const increment = prev < 50 ? 2 : prev < 80 ? 1 : 0.2;
         const next = prev + increment;
         return next >= 95 ? 95 : next;
-      });
-      setTimeLeft((prev) => {
-        const next = prev - 0.5;
-        return next > 0 ? next : 0;
       });
     }, 500);
   };
@@ -339,7 +332,6 @@ const CreatePlan: React.FC = () => {
   const stopSimulation = () => {
     if (progressInterval.current) clearInterval(progressInterval.current);
     setProgress(100);
-    setTimeLeft(0);
   };
 
   const handleGenerate = async () => {
@@ -448,9 +440,6 @@ const CreatePlan: React.FC = () => {
               <div className="absolute inset-0 bg-white/30 w-full h-full animate-[shimmer_2s_infinite] skew-x-12 opacity-50"></div>
             </div>
           </div>
-          <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">
-            Tempo estimado: {Math.ceil(timeLeft)}s
-          </p>
         </div>
       </div>
     );
@@ -612,15 +601,6 @@ const CreatePlan: React.FC = () => {
                   Selecione um público
                 </p>
               )}
-
-              <TextArea
-                name="competitors"
-                label="Principais Concorrentes"
-                value={data.competitors}
-                onChange={handleChange}
-                error={isError("competitors")}
-                placeholder="Liste quem disputa o mercado com você..."
-              />
             </>
           )}
 
