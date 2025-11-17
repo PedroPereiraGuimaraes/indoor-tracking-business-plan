@@ -1,10 +1,4 @@
 {
-  "env": {
-    "ROLLUP_SKIP_NODE_NATIVE": "true"
-  },
-  "build": {
-    "env": {
-      "ROLLUP_SKIP_NODE_NATIVE": "true"
-    }
-  }
+  "installCommand": "npm install --legacy-peer-deps --audit=false --fund=false",
+  "buildCommand": "npm run build"
 }
