@@ -9,251 +9,15 @@ import {
   CheckCircle,
   FileText,
 } from "lucide-react";
-import { Input, TextArea, SelectWithOther } from "../components/Input";
 import Button from "../components/Button";
 import { StartupData, GenerationStatus } from "../types";
 import { generateBusinessPlan } from "../services/geminiService";
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  pdf,
-  Font,
-} from "@react-pdf/renderer";
+import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
-
-// Registrar fontes (opcional - melhora a renderização)
-Font.register({
-  family: "Helvetica",
-  fonts: [
-    {
-      src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Helvetica/helvetica_regular.woff",
-      fontWeight: "normal",
-    },
-    {
-      src: "https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Helvetica/helvetica_bold.woff",
-      fontWeight: "bold",
-    },
-  ],
-});
-
-const steps = [
-  "Perfil",
-  "Mercado",
-  "Solução",
-  "Tecnologia",
-  "Estratégia",
-  "Financeiro",
-];
-
-const initialData: StartupData = {
-  name: "",
-  mission: "",
-  vision: "",
-  values: "",
-  segment: "",
-  targetAudience: "",
-  problem: "",
-  solution: "",
-  products: "",
-  technology: "",
-  roadmap: "",
-  intellectualProperty: "",
-  structure: "",
-  marketingStrategy: "",
-  financialForecast: "",
-  investmentNeeded: "",
-};
-
-// Definição dos campos obrigatórios
-const requiredFieldsByStep: { [key: number]: (keyof StartupData)[] } = {
-  0: ["name", "mission", "vision", "values"],
-  1: ["segment", "targetAudience"],
-  2: ["problem", "solution", "products"],
-  3: ["technology"],
-  4: ["structure", "marketingStrategy"],
-  5: ["investmentNeeded", "financialForecast"],
-};
-
-const segments = [
-  "SaaS (Software)",
-  "E-commerce / Varejo",
-  "Fintech",
-  "Healthtech / Saúde",
-  "Educação / EdTech",
-  "Serviços / Consultoria",
-  "Agronegócio",
-  "Indústria 4.0",
-  "Logística",
-];
-const audiences = [
-  "B2B (Empresas)",
-  "B2C (Consumidor Final)",
-  "B2B2C",
-  "PME (Pequenas Empresas)",
-  "Governo / Setor Público",
-];
-const investments = [
-  "Bootstrapping (Zero / Próprio)",
-  "Até R$ 10.000",
-  "R$ 10k - R$ 50k",
-  "R$ 50k - R$ 200k",
-  "R$ 200k - R$ 500k",
-  "Acima de R$ 1 Milhão",
-];
-const structures = [
-  "Fundador Solo",
-  "2-3 Sócios",
-  "Pequena Equipe (< 10)",
-  "Equipe Média (10-50)",
-];
-
-const getLoadingMessage = (progress: number) => {
-  if (progress < 20) return "Conectando aos servidores de IA...";
-  if (progress < 40) return "Analisando o mercado e concorrência...";
-  if (progress < 60) return "Estruturando estratégias de crescimento...";
-  if (progress < 80) return "Projetando modelo financeiro...";
-  return "Diagramando documento final...";
-};
-
-// Estilos ajustados para reduzir espaçamento
-const styles = StyleSheet.create({
-  page: {
-    padding: 40,
-    fontSize: 11,
-    fontFamily: "Helvetica",
-    lineHeight: 1.3, // Reduzido
-    color: "#333333",
-  },
-  header: {
-    marginBottom: 40, // Reduzido
-    textAlign: "center",
-    borderBottom: "2pt solid #000000",
-    paddingBottom: 10, // Reduzido
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 4, // Reduzido
-    color: "#000000",
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#666666",
-    marginBottom: 3, // Reduzido
-  },
-  date: {
-    fontSize: 10,
-    color: "#999999",
-    fontStyle: "italic",
-  },
-  section: {
-    marginBottom: 10, // Reduzido
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 4, // Reduzido
-    color: "#000000",
-    backgroundColor: "#f8f9fa",
-    padding: 4, // Reduzido
-    borderLeft: "3pt solid #000000",
-  },
-  subsectionTitle: {
-    fontSize: 12,
-    fontWeight: "bold",
-    marginBottom: 3, // Reduzido
-    color: "#444444",
-    marginTop: 6, // Reduzido
-  },
-  subsubsectionTitle: {
-    fontSize: 11,
-    fontWeight: "bold",
-    marginBottom: 2, // Reduzido
-    color: "#555555",
-    marginTop: 4, // Reduzido
-  },
-  paragraph: {
-    marginBottom: 4, // Reduzido
-    textAlign: "justify",
-  },
-  bold: {
-    fontWeight: "bold",
-  },
-  footer: {
-    position: "absolute",
-    bottom: 30,
-    left: 40,
-    right: 40,
-    textAlign: "center",
-    fontSize: 9,
-    color: "#999999",
-    borderTop: "1pt solid #eeeeee",
-    paddingTop: 8,
-  },
-});
-
-// Função processContent atualizada com menos espaçamento
-const processContent = (content: string) => {
-  const lines = content.split("\n");
-  const elements = [];
-
-  lines.forEach((line, index) => {
-    if (line.trim() === "") {
-      // Espaçamento mínimo entre parágrafos
-      elements.push(<Text key={index}>{"\n"}</Text>);
-      return;
-    }
-
-    // Processar títulos com menos espaçamento
-    if (line.startsWith("# ")) {
-      elements.push(
-        <Text key={index} style={styles.sectionTitle}>
-          {line.replace("# ", "").replace(/\*\*/g, "")}
-        </Text>
-      );
-    } else if (line.startsWith("## ")) {
-      elements.push(
-        <Text key={index} style={styles.subsectionTitle}>
-          {line.replace("## ", "").replace(/\*\*/g, "")}
-        </Text>
-      );
-    } else if (line.startsWith("### ")) {
-      elements.push(
-        <Text key={index} style={styles.subsubsectionTitle}>
-          {line.replace("### ", "").replace(/\*\*/g, "")}
-        </Text>
-      );
-    } else {
-      // Processar texto com negrito
-      const textParts = line.split(/(\*\*.*?\*\*)/g);
-      const textElements = textParts
-        .map((part, partIndex) => {
-          if (part.startsWith("**") && part.endsWith("**")) {
-            return (
-              <Text key={partIndex} style={styles.bold}>
-                {part.slice(2, -2)}
-              </Text>
-            );
-          } else if (part) {
-            return part;
-          }
-          return null;
-        })
-        .filter(Boolean);
-
-      elements.push(
-        <Text key={index} style={styles.paragraph}>
-          {textElements}
-        </Text>
-      );
-    }
-  });
-
-  return elements;
-};
+import { steps, initialData, requiredFieldsByStep } from "../constants";
+import { getLoadingMessage } from "../utils/loadingMessages";
+import { BusinessPlanDocument } from "../components/pdf/BusinessPlanDocument";
+import { StepForms } from "../components/StepForms";
 
 const CreatePlan: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -361,24 +125,6 @@ const CreatePlan: React.FC = () => {
     };
   }, []);
 
-  // MyDocument corrigido
-  const MyDocument = ({ data, content }) => (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{data.name}</Text>
-          <Text style={styles.subtitle}>Plano de Negócios</Text>
-        </View>
-
-        <View>{processContent(content)}</View>
-
-        <Text style={styles.footer} fixed>
-          Documento gerado por Indoor Tracking Business Plan
-        </Text>
-      </Page>
-    </Document>
-  );
-
   const handleDirectDownload = async () => {
     if (!generatedPlan) {
       alert("O plano ainda não foi gerado.");
@@ -388,7 +134,7 @@ const CreatePlan: React.FC = () => {
     setIsDownloading(true);
     try {
       const blob = await pdf(
-        <MyDocument data={data} content={generatedPlan} />
+        <BusinessPlanDocument data={data} content={generatedPlan} />
       ).toBlob();
       saveAs(
         blob,
@@ -535,228 +281,58 @@ const CreatePlan: React.FC = () => {
         </div>
 
         {/* Form */}
-        <div className="animate-fade-in-up w-full">
-          {currentStep === 0 && (
-            <>
-              <Input
-                name="name"
-                label="Nome da Startup"
-                value={data.name}
-                onChange={handleChange}
-                error={isError("name")}
-                placeholder="Ex: TechSolution"
-                autoFocus
-              />
-              <TextArea
-                name="mission"
-                label="Missão"
-                value={data.mission}
-                onChange={handleChange}
-                error={isError("mission")}
-                placeholder="Qual o propósito da empresa?"
-              />
-              <TextArea
-                name="vision"
-                label="Visão"
-                value={data.vision}
-                onChange={handleChange}
-                error={isError("vision")}
-                placeholder="Onde querem chegar?"
-              />
-              <TextArea
-                name="values"
-                label="Valores"
-                value={data.values}
-                onChange={handleChange}
-                error={isError("values")}
-                placeholder="Princípios éticos..."
-              />
-            </>
-          )}
+        <StepForms
+          currentStep={currentStep}
+          data={data}
+          handleChange={handleChange}
+          isError={isError}
+          validationErrors={validationErrors}
+        />
 
-          {currentStep === 1 && (
-            <>
-              <SelectWithOther
-                name="segment"
-                label="Segmento"
-                options={segments}
-                value={data.segment}
-                onChange={handleChange}
-              />
-              {validationErrors.includes("segment") && (
-                <p className="text-red-500 text-xs -mt-3 mb-3">
-                  Selecione um segmento
-                </p>
-              )}
-
-              <SelectWithOther
-                name="targetAudience"
-                label="Público-Alvo"
-                options={audiences}
-                value={data.targetAudience}
-                onChange={handleChange}
-              />
-              {validationErrors.includes("targetAudience") && (
-                <p className="text-red-500 text-xs -mt-3 mb-3">
-                  Selecione um público
-                </p>
-              )}
-            </>
-          )}
-
-          {currentStep === 2 && (
-            <>
-              <TextArea
-                name="problem"
-                label="O Problema"
-                value={data.problem}
-                onChange={handleChange}
-                error={isError("problem")}
-                placeholder="Qual dor sua startup resolve?"
-              />
-              <TextArea
-                name="solution"
-                label="A Solução"
-                value={data.solution}
-                onChange={handleChange}
-                error={isError("solution")}
-                placeholder="Como você resolve isso?"
-              />
-              <TextArea
-                name="products"
-                label="Produtos/Serviços"
-                value={data.products}
-                onChange={handleChange}
-                error={isError("products")}
-                placeholder="O que você vende exatamente?"
-              />
-            </>
-          )}
-
-          {currentStep === 3 && (
-            <>
-              <TextArea
-                name="technology"
-                label="Tecnologia"
-                value={data.technology}
-                onChange={handleChange}
-                error={isError("technology")}
-                placeholder="Stack, IA, App, Plataforma..."
-              />
-              <TextArea
-                name="roadmap"
-                label="Próximos Passos (Opcional)"
-                value={data.roadmap}
-                onChange={handleChange}
-                placeholder="O que será desenvolvido em breve?"
-              />
-              <Input
-                name="intellectualProperty"
-                label="Propriedade Intelectual (Opcional)"
-                value={data.intellectualProperty}
-                onChange={handleChange}
-                placeholder="Patentes, marcas..."
-              />
-            </>
-          )}
-
-          {currentStep === 4 && (
-            <>
-              <SelectWithOther
-                name="structure"
-                label="Estrutura Atual"
-                options={structures}
-                value={data.structure}
-                onChange={handleChange}
-              />
-              {validationErrors.includes("structure") && (
-                <p className="text-red-500 text-xs -mt-3 mb-3">
-                  Campo obrigatório
-                </p>
-              )}
-
-              <TextArea
-                name="marketingStrategy"
-                label="Canais de Aquisição"
-                value={data.marketingStrategy}
-                onChange={handleChange}
-                error={isError("marketingStrategy")}
-                placeholder="Como os clientes vão te achar?"
-              />
-            </>
-          )}
-
-          {currentStep === 5 && (
-            <>
-              <SelectWithOther
-                name="investmentNeeded"
-                label="Investimento Inicial"
-                options={investments}
-                value={data.investmentNeeded}
-                onChange={handleChange}
-              />
-              {validationErrors.includes("investmentNeeded") && (
-                <p className="text-red-500 text-xs -mt-3 mb-3">
-                  Campo obrigatório
-                </p>
-              )}
-
-              <TextArea
-                name="financialForecast"
-                label="Expectativa de Receita (1º Ano)"
-                value={data.financialForecast}
-                onChange={handleChange}
-                error={isError("financialForecast")}
-                placeholder="Quanto espera faturar?"
-              />
-            </>
-          )}
-
-          {/* Error Message Global */}
-          {validationErrors.length > 0 && (
-            <div className="bg-red-50 text-red-500 px-4 py-3 rounded-lg mb-4 flex items-center gap-2 text-sm animate-fade-in-up">
-              <AlertCircle size={16} />
-              Por favor, preencha todos os campos obrigatórios para continuar.
-            </div>
-          )}
-
-          <div className="flex justify-between mt-8 items-center">
-            <Button
-              variant="ghost"
-              onClick={prevStep}
-              disabled={currentStep === 0}
-              className={`${
-                currentStep === 0
-                  ? "invisible"
-                  : "text-gray-400 hover:text-charcoal"
-              }`}
-            >
-              <ChevronLeft size={18} /> Voltar
-            </Button>
-
-            <Button
-              onClick={nextStep}
-              variant="primary"
-              className="rounded-full px-8 shadow-lg"
-            >
-              {currentStep === steps.length - 1 ? (
-                <>
-                  Gerar Plano <Sparkles size={18} />
-                </>
-              ) : (
-                <>
-                  Próximo <ChevronRight size={18} />
-                </>
-              )}
-            </Button>
+        {/* Error Message Global */}
+        {validationErrors.length > 0 && (
+          <div className="bg-red-50 text-red-500 px-4 py-3 rounded-lg mb-4 flex items-center gap-2 text-sm animate-fade-in-up">
+            <AlertCircle size={16} />
+            Por favor, preencha todos os campos obrigatórios para continuar.
           </div>
+        )}
 
-          {errorMsg && (
-            <div className="mt-4 text-center text-red-500 text-sm">
-              {errorMsg}
-            </div>
-          )}
+        <div className="flex justify-between mt-8 items-center">
+          <Button
+            variant="ghost"
+            onClick={prevStep}
+            disabled={currentStep === 0}
+            className={`${
+              currentStep === 0
+                ? "invisible"
+                : "text-gray-400 hover:text-charcoal"
+            }`}
+          >
+            <ChevronLeft size={18} /> Voltar
+          </Button>
+
+          <Button
+            onClick={nextStep}
+            variant="primary"
+            className="rounded-full px-8 shadow-lg"
+          >
+            {currentStep === steps.length - 1 ? (
+              <>
+                Gerar Plano <Sparkles size={18} />
+              </>
+            ) : (
+              <>
+                Próximo <ChevronRight size={18} />
+              </>
+            )}
+          </Button>
         </div>
+
+        {errorMsg && (
+          <div className="mt-4 text-center text-red-500 text-sm">
+            {errorMsg}
+          </div>
+        )}
       </div>
     </div>
   );
