@@ -1,6 +1,13 @@
 import React from "react";
 import { Input, TextArea, SelectWithOther } from "./Input";
 import { StartupData } from "../types";
+import {
+  sectors,
+  businessModels,
+  stages,
+  teamStructures,
+  investmentRanges,
+} from "../constants";
 
 interface StepFormsProps {
   currentStep: number;
@@ -21,42 +28,6 @@ export const StepForms: React.FC<StepFormsProps> = ({
   isError,
   validationErrors,
 }) => {
-  const segments = [
-    "SaaS (Software)",
-    "E-commerce / Varejo",
-    "Fintech",
-    "Healthtech / Saúde",
-    "Educação / EdTech",
-    "Serviços / Consultoria",
-    "Agronegócio",
-    "Indústria 4.0",
-    "Logística",
-  ];
-
-  const audiences = [
-    "B2B (Empresas)",
-    "B2C (Consumidor Final)",
-    "B2B2C",
-    "PME (Pequenas Empresas)",
-    "Governo / Setor Público",
-  ];
-
-  const investments = [
-    "Bootstrapping (Zero / Próprio)",
-    "Até R$ 10.000",
-    "R$ 10k - R$ 50k",
-    "R$ 50k - R$ 200k",
-    "R$ 200k - R$ 500k",
-    "Acima de R$ 1 Milhão",
-  ];
-
-  const structures = [
-    "Fundador Solo",
-    "2-3 Sócios",
-    "Pequena Equipe (< 10)",
-    "Equipe Média (10-50)",
-  ];
-
   return (
     <div className="animate-fade-in-up w-full">
       {currentStep === 0 && (
@@ -71,114 +42,104 @@ export const StepForms: React.FC<StepFormsProps> = ({
             autoFocus
           />
           <TextArea
-            name="mission"
-            label="Missão"
-            value={data.mission}
+            name="description"
+            label="Descrição Resumida"
+            value={data.description}
             onChange={handleChange}
-            error={isError("mission")}
-            placeholder="Qual o propósito da empresa?"
+            error={isError("description")}
+            placeholder="Descreva seu negócio em um texto simples"
+            maxLength={120}
           />
-          <TextArea
-            name="vision"
-            label="Visão"
-            value={data.vision}
+          <SelectWithOther
+            name="sector"
+            label="Setor Principal"
+            options={sectors}
+            value={data.sector}
             onChange={handleChange}
-            error={isError("vision")}
-            placeholder="Onde querem chegar?"
           />
-          <TextArea
-            name="values"
-            label="Valores"
-            value={data.values}
+          <SelectWithOther
+            name="businessModel"
+            label="Modelo de Negócio"
+            options={businessModels}
+            value={data.businessModel}
             onChange={handleChange}
-            error={isError("values")}
-            placeholder="Princípios éticos..."
           />
         </>
       )}
 
       {currentStep === 1 && (
         <>
-          <SelectWithOther
-            name="segment"
-            label="Segmento"
-            options={segments}
-            value={data.segment}
+          <TextArea
+            name="problem"
+            label="Problema"
+            value={data.problem}
             onChange={handleChange}
+            error={isError("problem")}
+            placeholder="Qual é o principal problema que você resolve para seus clientes?"
           />
-          {validationErrors.includes("segment") && (
-            <p className="text-red-500 text-xs -mt-3 mb-3">
-              Selecione um segmento
-            </p>
-          )}
-
-          <SelectWithOther
-            name="targetAudience"
-            label="Público-Alvo"
-            options={audiences}
-            value={data.targetAudience}
+          <TextArea
+            name="solution"
+            label="Solução Proposta"
+            value={data.solution}
             onChange={handleChange}
+            error={isError("solution")}
+            placeholder="Como sua solução resolve esse problema de forma única?"
           />
-          {validationErrors.includes("targetAudience") && (
-            <p className="text-red-500 text-xs -mt-3 mb-3">
-              Selecione um público
-            </p>
-          )}
         </>
       )}
 
       {currentStep === 2 && (
         <>
-          <TextArea
-            name="problem"
-            label="O Problema"
-            value={data.problem}
+          <SelectWithOther
+            name="stage"
+            label="Estágio do Produto"
+            options={stages}
+            value={data.stage}
             onChange={handleChange}
-            error={isError("problem")}
-            placeholder="Qual dor sua startup resolve?"
           />
           <TextArea
-            name="solution"
-            label="A Solução"
-            value={data.solution}
+            name="valueProposition"
+            label="Proposta de Valor"
+            value={data.valueProposition}
             onChange={handleChange}
-            error={isError("solution")}
-            placeholder="Como você resolve isso?"
+            error={isError("valueProposition")}
+            placeholder="Que valor único você entrega aos clientes?"
           />
           <TextArea
-            name="products"
-            label="Produtos/Serviços"
-            value={data.products}
+            name="differential"
+            label="Diferencial Competitivo"
+            value={data.differential}
             onChange={handleChange}
-            error={isError("products")}
-            placeholder="O que você vende exatamente?"
+            error={isError("differential")}
+            placeholder="O que torna sua solução melhor que a concorrência?"
           />
         </>
       )}
 
       {currentStep === 3 && (
         <>
-          <TextArea
-            name="technology"
-            label="Tecnologia"
-            value={data.technology}
+          <SelectWithOther
+            name="teamStructure"
+            label="Estrutura da Equipe"
+            options={teamStructures}
+            value={data.teamStructure}
             onChange={handleChange}
-            error={isError("technology")}
-            placeholder="Stack, IA, App, Plataforma..."
           />
           <TextArea
-            name="roadmap"
-            label="Próximos Passos (Opcional)"
-            value={data.roadmap}
+            name="teamRoles"
+            label="Principais Funções"
+            value={data.teamRoles}
             onChange={handleChange}
-            placeholder="O que será desenvolvido em breve?"
+            error={isError("teamRoles")}
+            placeholder="Quais são as principais funções/competências do time?"
           />
           <Input
-            name="intellectualProperty"
-            label="Propriedade Intelectual (Opcional)"
-            value={data.intellectualProperty}
+            name="location"
+            label="Localização/Atuação"
+            value={data.location}
             onChange={handleChange}
-            placeholder="Patentes, marcas..."
+            error={isError("location")}
+            placeholder="Cidade, região ou países de atuação"
           />
         </>
       )}
@@ -186,47 +147,19 @@ export const StepForms: React.FC<StepFormsProps> = ({
       {currentStep === 4 && (
         <>
           <SelectWithOther
-            name="structure"
-            label="Estrutura Atual"
-            options={structures}
-            value={data.structure}
+            name="availableInvestment"
+            label="Capital Disponível"
+            options={investmentRanges}
+            value={data.availableInvestment}
             onChange={handleChange}
           />
-          {validationErrors.includes("structure") && (
-            <p className="text-red-500 text-xs -mt-3 mb-3">Campo obrigatório</p>
-          )}
-
           <TextArea
-            name="marketingStrategy"
-            label="Canais de Aquisição"
-            value={data.marketingStrategy}
+            name="costStructure"
+            label="Estrutura de Custos"
+            value={data.costStructure}
             onChange={handleChange}
-            error={isError("marketingStrategy")}
-            placeholder="Como os clientes vão te achar?"
-          />
-        </>
-      )}
-
-      {currentStep === 5 && (
-        <>
-          <SelectWithOther
-            name="investmentNeeded"
-            label="Investimento Inicial"
-            options={investments}
-            value={data.investmentNeeded}
-            onChange={handleChange}
-          />
-          {validationErrors.includes("investmentNeeded") && (
-            <p className="text-red-500 text-xs -mt-3 mb-3">Campo obrigatório</p>
-          )}
-
-          <TextArea
-            name="financialForecast"
-            label="Expectativa de Receita (1º Ano)"
-            value={data.financialForecast}
-            onChange={handleChange}
-            error={isError("financialForecast")}
-            placeholder="Quanto espera faturar?"
+            error={isError("costStructure")}
+            placeholder="Quais são os principais custos operacionais?"
           />
         </>
       )}

@@ -1,31 +1,27 @@
 export interface StartupData {
-  // 1. General
+  // 1. Identificação
   name: string;
-  mission: string;
-  vision: string;
-  values: string;
+  description: string;
+  sector: string;
+  businessModel: string;
 
-  // 2. Market
-  segment: string;
-  targetAudience: string;
-
-  // 3. Product
+  // 2. Problema & Solução
+  location: string;
   problem: string;
   solution: string;
-  products: string;
 
-  // 4. Tech
-  technology: string;
-  roadmap: string;
-  intellectualProperty: string;
+  // 3. Produto & Mercado
+  stage: string;
+  valueProposition: string;
+  differential: string;
 
-  // 5. Strategy
-  structure: string; // Organizational structure
-  marketingStrategy: string;
+  // 4. Equipe & Recursos
+  teamStructure: string;
+  teamRoles: string;
 
-  // 6. Financial
-  financialForecast: string;
-  investmentNeeded: string;
+  // 5. Estratégia & Finanças
+  availableInvestment: string;
+  costStructure: string;
 }
 
 export enum GenerationStatus {

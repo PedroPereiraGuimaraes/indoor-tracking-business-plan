@@ -1,37 +1,50 @@
 import React from "react";
-import { Text } from "@react-pdf/renderer";
+import { Text, View } from "@react-pdf/renderer";
 import { styles } from "./PDFStyles";
 
 export const processContent = (content: string) => {
   const lines = content.split("\n");
   const elements: JSX.Element[] = [];
+  let isFirstParagraph = true;
 
   lines.forEach((line, index) => {
-    if (line.trim() === "") {
+    const trimmedLine = line.trim();
+
+    if (trimmedLine === "") {
       elements.push(<Text key={index}>{"\n"}</Text>);
+      isFirstParagraph = true; // Reseta para próximo parágrafo
       return;
     }
 
-    if (line.startsWith("# ")) {
+    if (trimmedLine === "---") {
+      elements.push(<View key={index} style={styles.divider} />);
+      isFirstParagraph = true;
+      return;
+    }
+
+    if (trimmedLine.startsWith("# ")) {
       elements.push(
-        <Text key={index} style={styles.sectionTitle}>
-          {line.replace("# ", "").replace(/\*\*/g, "")}
+        <Text key={index} style={styles.mainTitle}>
+          {trimmedLine.replace("# ", "").replace(/\*\*/g, "")}
         </Text>
       );
-    } else if (line.startsWith("## ")) {
+      isFirstParagraph = true;
+    } else if (trimmedLine.startsWith("## ")) {
+      elements.push(
+        <Text key={index} style={styles.subtitle}>
+          {trimmedLine.replace("## ", "").replace(/\*\*/g, "")}
+        </Text>
+      );
+      isFirstParagraph = true;
+    } else if (trimmedLine.startsWith("### ")) {
       elements.push(
         <Text key={index} style={styles.subsectionTitle}>
-          {line.replace("## ", "").replace(/\*\*/g, "")}
+          {trimmedLine.replace("### ", "").replace(/\*\*/g, "")}
         </Text>
       );
-    } else if (line.startsWith("### ")) {
-      elements.push(
-        <Text key={index} style={styles.subsubsectionTitle}>
-          {line.replace("### ", "").replace(/\*\*/g, "")}
-        </Text>
-      );
+      isFirstParagraph = true;
     } else {
-      const textParts = line.split(/(\*\*.*?\*\*)/g);
+      const textParts = trimmedLine.split(/(\*\*.*?\*\*)/g);
       const textElements = textParts
         .map((part, partIndex) => {
           if (part.startsWith("**") && part.endsWith("**")) {
@@ -47,11 +60,18 @@ export const processContent = (content: string) => {
         })
         .filter(Boolean);
 
+      // Usa estilo diferente para primeiro parágrafo após título
+      const paragraphStyle = isFirstParagraph
+        ? styles.paragraphFirst
+        : styles.paragraph;
+
       elements.push(
-        <Text key={index} style={styles.paragraph}>
+        <Text key={index} style={paragraphStyle}>
           {textElements}
         </Text>
       );
+
+      isFirstParagraph = false;
     }
   });
 
