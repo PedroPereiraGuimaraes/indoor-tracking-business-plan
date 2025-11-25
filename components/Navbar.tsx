@@ -33,7 +33,7 @@ const Navbar: React.FC = () => {
               </div>
               <div className="flex flex-col justify-center">
                 <span className="text-charcoal font-heading font-bold text-lg tracking-tight leading-none">
-                  Business
+                  BUSINESS
                 </span>
                 <span className="text-gray-400 font-sans text-[12px] tracking-widest uppercase leading-none">
                   Plan Pipeline
